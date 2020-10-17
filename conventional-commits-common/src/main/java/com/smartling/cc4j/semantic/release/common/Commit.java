@@ -67,6 +67,19 @@ public class Commit
         return Optional.ofNullable(type);
     }
 
+    public String getCommitMessage() {
+        String message = getMessageForComparison();
+        String[] split = message.split(":");
+        if(split.length > 1) {
+            return split[1].trim();
+        }
+        return "";
+    }
+
+    public String getCommitHash() {
+        return this.commit.getCommitHash();
+    }
+
     private String getMessageForComparison()
     {
         String msg = commit.getShortMessage();
