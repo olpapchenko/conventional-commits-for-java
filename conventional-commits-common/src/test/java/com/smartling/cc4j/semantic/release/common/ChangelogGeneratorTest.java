@@ -11,26 +11,46 @@ import static org.junit.Assert.assertNull;
 
 public class ChangelogGeneratorTest {
     private static final String COMMIT_HASH = "2717635691";
+    private static final String TRACKING_SYSTEM_URL_FORMAT = "http://test.com?id=%s";
+    private static final String REPO_URL_FORMAT = "http://repo.com?id=%s";
+
     private ChangelogGenerator changelogGenerator;
 
-    private static final String EXPECTED_CHANGELOG = "## 0.2.7 (2020-10-17)\n" +
+    private static final String EXPECTED_CHANGELOG = "## 0.2.7 (2020-10-18)\n" +
         "###Breaking changes\n" +
-        "* breaking change test (27176356)\n" +
+        "* breaking change test [(27176356)](http://repo.com?id=2717635691)\n" +
         "###Bug fixes\n" +
-        "* fix test (27176356)\n" +
-        "* fix test 2 (27176356)\n" +
+        "* fix test 2 [(27176356)](http://repo.com?id=2717635691)\n" +
+        "* fix test [(27176356)](http://repo.com?id=2717635691)\n" +
+        "* fix ui test [(ticket-id)](http://test.com?id=ticket-id) [(27176356)](http://repo.com?id=2717635691)\n" +
         "###Feature\n" +
-        "* feat test (27176356)\n" +
+        "* fix test [(27176356)](http://repo.com?id=2717635691)\n" +
         "###Docs\n" +
-        "* docs test (27176356)\n" +
+        "* docs test [(27176356)](http://repo.com?id=2717635691)\n" +
         "###CI\n" +
-        "* ci test (27176356)\n" +
+        "* ci test [(27176356)](http://repo.com?id=2717635691)\n" +
         "###Build\n" +
-        "* build test (27176356)";
+        "* build test [(27176356)](http://repo.com?id=2717635691)";
+
+    private static final String EXPECTED_CHANGELOG_NO_URLS = "## 0.2.7 (2020-10-18)\n" +
+        "###Breaking changes\n" +
+        "* breaking change test (2717635691)\n" +
+        "###Bug fixes\n" +
+        "* fix test (2717635691)\n" +
+        "* fix test 2 (2717635691)\n" +
+        "* fix ui test (ticket-id) (2717635691)\n" +
+        "###Feature\n" +
+        "* fix test (2717635691)\n" +
+        "###Docs\n" +
+        "* docs test (2717635691)\n" +
+        "###CI\n" +
+        "* ci test (2717635691)\n" +
+        "###Build\n" +
+        "* build test (2717635691)";
 
     @Before
     public void setUp() {
-        changelogGenerator = new ChangelogGenerator("", "");
+        changelogGenerator = new ChangelogGenerator(REPO_URL_FORMAT, TRACKING_SYSTEM_URL_FORMAT);
     }
 
     @Test
@@ -58,14 +78,21 @@ public class ChangelogGeneratorTest {
         assertEquals(EXPECTED_CHANGELOG, changelog);
     }
 
+    @Test
+    public void testChangelogGeneratedNoUrlFormatsProvided() {
+        Map<ConventionalCommitType, Set<Commit>> commitsByCommitType = getCommitsByCommitType();
+        String changelog = new ChangelogGenerator(null, null).generate("0.2.7", commitsByCommitType);
+        assertEquals(EXPECTED_CHANGELOG_NO_URLS, changelog);
+    }
+
     private Map<ConventionalCommitType, Set<Commit>> getCommitsByCommitType() {
         Map<ConventionalCommitType, Set<Commit>> res = new HashMap<>();
         res.put(ConventionalCommitType.BREAKING_CHANGE,
             new HashSet<>(Collections.singletonList(new Commit(new DummyCommitAdapter("breaking change: breaking change test", COMMIT_HASH)))));
         res.put(ConventionalCommitType.FEAT,
-            new HashSet<>(Collections.singletonList(new Commit(new DummyCommitAdapter("feat(ui): feat test", COMMIT_HASH)))));
+            new HashSet<>(Collections.singletonList(new Commit(new DummyCommitAdapter("feat(ui): fix test", COMMIT_HASH)))));
         res.put(ConventionalCommitType.FIX,
-            new HashSet<>(Arrays.asList(new Commit(new DummyCommitAdapter("fix(ui): fix test", COMMIT_HASH)),
+            new HashSet<>(Arrays.asList(new Commit(new DummyCommitAdapter("fix(ui): [TICKET-ID] fix ui test", COMMIT_HASH)),
                 new Commit(new DummyCommitAdapter("fix(ui): fix test", COMMIT_HASH)),
                 new Commit(new DummyCommitAdapter("fix(ui): fix test 2", COMMIT_HASH)))));
         res.put(ConventionalCommitType.CI,

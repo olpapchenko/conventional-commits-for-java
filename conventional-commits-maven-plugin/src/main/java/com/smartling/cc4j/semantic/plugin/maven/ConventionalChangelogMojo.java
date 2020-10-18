@@ -8,6 +8,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,6 +21,12 @@ public class ConventionalChangelogMojo extends AbstractVersioningMojo {
 
     private static final String CHANGELOG_FILE_NAME = "CHANGELOG.MD";
 
+    @Parameter( property = "conventional-commits-maven-plugin.repoUrlFormat")
+    private String repoUrlFormat;
+
+    @Parameter( property = "conventional-commits-maven-plugin.trackingSystemUrlFormat")
+    private String trackingSystemUrlFormat;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -27,7 +34,7 @@ public class ConventionalChangelogMojo extends AbstractVersioningMojo {
                 .getChangelogExtractor()
                 .getGroupedCommitsByCommitTypes();
 
-            ChangelogGenerator changelogGenerator = new ChangelogGenerator("", "");
+            ChangelogGenerator changelogGenerator = new ChangelogGenerator(repoUrlFormat, trackingSystemUrlFormat);
             String changeLogs = changelogGenerator.generate(this.getNextVersion().toString(), commitsByCommitTypes);
             appendChangeLogs(changeLogs);
 

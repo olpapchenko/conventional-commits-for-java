@@ -16,6 +16,7 @@ public class ChangelogGenerator {
 
     private static final String CHANGELOG_FORMAT = "## %s (%s)" +
         "%s";
+    private static final String MD_LINK_FORMAT = "[%s](%s)";
     private static final String BUG_FIXES_HEADER = "Bug fixes";
     private static final String FEATURE_HEADER = "Feature";
     private static final String BREAKING_HEADER = "Breaking changes";
@@ -94,23 +95,23 @@ public class ChangelogGenerator {
                 logger.warn("Skipping message for commit: {}", commit.getCommitHash());
                 return null;
             }
-            return "*" + commit.getCommitMessageDescription() + " (" + commit.getCommitHash().substring(0, COMMIT_HASH_DISPLAYED_LENGTH) + ")";
+            return "* " + commit.getCommitMessageDescription().get() + getTrackingSystemLink(commit) + getCommitHashLink(commit);
         });
     }
 
     private String getCommitHashLink(Commit commit) {
         if(this.repoUrlFormat == null) {
-            return commit.getCommitHash();
+            return " (" + commit.getCommitHash() + ")";
         } else {
-            return String.format(this.repoUrlFormat, commit.getCommitHash());
+            return " " + String.format(MD_LINK_FORMAT, "(" + commit.getCommitHash().substring(0, COMMIT_HASH_DISPLAYED_LENGTH) + ")", String.format(this.repoUrlFormat, commit.getCommitHash())) ;
         }
     }
 
     private String getTrackingSystemLink(Commit commit) {
-        if(this.trackingSystemUrlFormat == null || !commit.getTrackingSystemId().isPresent()) {
-            return "";
+        if(this.trackingSystemUrlFormat == null) {
+            return commit.getTrackingSystemId().map(s -> " (" + s + ")").orElse("");
         } else {
-            return String.format(this.trackingSystemUrlFormat, commit.getTrackingSystemId().get());
+            return " " + String.format(MD_LINK_FORMAT, "(" + commit.getTrackingSystemId().get() + ")", String.format(this.trackingSystemUrlFormat, commit.getTrackingSystemId().get()));
         }
     }
 }
