@@ -2,12 +2,18 @@ package com.smartling.cc4j.semantic.release.common.changelog;
 
 import com.smartling.cc4j.semantic.release.common.Commit;
 import com.smartling.cc4j.semantic.release.common.ConventionalCommitType;
+import com.smartling.cc4j.semantic.release.common.LogHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ChangelogGenerator {
+    public static final int COMMIT_HASH_DISPLAYED_LENGTH = 8;
+    private final Logger logger = LoggerFactory.getLogger(LogHandler.class);
+
     private static final String CHANGELOG_FORMAT = "## %s (%s)" +
         "%s";
     private static final String BUG_FIXES_HEADER = "Bug fixes";
@@ -80,7 +86,9 @@ public class ChangelogGenerator {
 
     private String getChangeLogEntry(Commit commit) {
         if (commit.getCommitMessage() != null && !commit.getCommitMessage().trim().equals("")) {
-            return "*" + commit.getCommitMessage() + " (" + commit.getCommitHash().substring(0, 8) + ")";
+            return "*" + commit.getCommitMessage() + " (" + commit.getCommitHash().substring(0, COMMIT_HASH_DISPLAYED_LENGTH) + ")";
+        } else {
+            logger.warn("Skipping message for commit: {}", commit.getCommitHash());
         }
         return null;
     }
