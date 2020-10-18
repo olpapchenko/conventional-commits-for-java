@@ -30,7 +30,7 @@ public class ChangelogGeneratorTest {
 
     @Before
     public void setUp() {
-        changelogGenerator = new ChangelogGenerator();
+        changelogGenerator = new ChangelogGenerator("", "");
     }
 
     @Test

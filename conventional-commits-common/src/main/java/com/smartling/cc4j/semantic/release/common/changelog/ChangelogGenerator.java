@@ -22,6 +22,13 @@ public class ChangelogGenerator {
     private static final String DOCS_HEADER = "Docs";
     private static final String CI_HEADER = "CI";
     private static final String BUILD_HEADER = "Build";
+    private String repoUrlFormat;
+    private String trackingSystemUrlFormat;
+
+    public ChangelogGenerator(String repoUrlFormat, String trackingSystemUrlFormat) {
+        this.repoUrlFormat = repoUrlFormat;
+        this.trackingSystemUrlFormat = trackingSystemUrlFormat;
+    }
 
     public String generate(String nextVersion, Map<ConventionalCommitType, Set<Commit>> commitsByCommitType) {
         Objects.requireNonNull(nextVersion, "next version can not be null");
@@ -58,7 +65,7 @@ public class ChangelogGenerator {
 
         sections = sections.stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        if(sections.isEmpty()) {
+        if (sections.isEmpty()) {
             return null;
         }
 
@@ -67,7 +74,7 @@ public class ChangelogGenerator {
 
     private String getSection(String header, Set<Commit> commits) {
         String sectionEntries = getSectionEntries(commits);
-        if(sectionEntries != null && !sectionEntries.trim().equals("")) {
+        if (sectionEntries != null && !sectionEntries.trim().equals("")) {
             return "###" + header + "\n" + sectionEntries;
         }
 
@@ -77,19 +84,40 @@ public class ChangelogGenerator {
     private String getSectionEntries(Set<Commit> commits) {
         Set<String> uniqueMessages = new HashSet<>();
         return commits.stream()
-            .filter(commit -> uniqueMessages.add(commit.getCommitMessage()))
+            .filter(commit -> commit.getCommitMessageDescription().isPresent() && uniqueMessages.add(commit.getCommitMessageDescription().get()))
             .map(this::getChangeLogEntry)
-            .filter(Objects::nonNull)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
             .sorted()
             .collect(Collectors.joining("\n"));
     }
 
-    private String getChangeLogEntry(Commit commit) {
-        if (commit.getCommitMessage() != null && !commit.getCommitMessage().trim().equals("")) {
-            return "*" + commit.getCommitMessage() + " (" + commit.getCommitHash().substring(0, COMMIT_HASH_DISPLAYED_LENGTH) + ")";
-        } else {
+    private Optional<String> getChangeLogEntry(Commit commit) {
+        if(!commit.getCommitMessageDescription().isPresent()) {
             logger.warn("Skipping message for commit: {}", commit.getCommitHash());
         }
-        return null;
+        return commit.getCommitMessageDescription().map(message -> {
+            if(commit.getCommitMessageDescription().get().trim().equals("")) {
+                logger.warn("Skipping message for commit: {}", commit.getCommitHash());
+                return null;
+            }
+            return "*" + commit.getCommitMessageDescription() + " (" + commit.getCommitHash().substring(0, COMMIT_HASH_DISPLAYED_LENGTH) + ")";
+        });
+    }
+
+    private String getCommitHashLink(Commit commit) {
+        if(this.repoUrlFormat == null) {
+            return commit.getCommitHash();
+        } else {
+            return String.format(this.repoUrlFormat, commit.getCommitHash());
+        }
+    }
+
+    private String getTrackingSystemLink(Commit commit) {
+        if(this.trackingSystemUrlFormat == null || !commit.getTrackingSystemId().isPresent()) {
+            return "";
+        } else {
+            return String.format(this.trackingSystemUrlFormat, commit.getTrackingSystemId().get());
+        }
     }
 }
