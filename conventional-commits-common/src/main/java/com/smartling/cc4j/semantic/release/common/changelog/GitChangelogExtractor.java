@@ -22,11 +22,11 @@ public class GitChangelogExtractor implements ChangelogExtractor {
 
         try {
             Iterable<RevCommit> commits = logHandler.getCommitsSinceLastTag();
-            if (commits == null) {
-                return null;
-            }
-
             Map<ConventionalCommitType, Set<Commit>> res = new HashMap<>();
+
+            if (commits == null) {
+                return res;
+            }
 
             List<Commit> commitList = new ArrayList<>();
             commits.iterator().forEachRemaining(c -> commitList.add(new Commit(new GitCommitAdapter(c))));

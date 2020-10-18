@@ -32,53 +32,46 @@ public class ChangelogGenerator {
 
     public String generate(String nextVersion, Map<ConventionalCommitType, Set<Commit>> commitsByCommitType) {
         Objects.requireNonNull(nextVersion, "next version can not be null");
-
-        if (commitsByCommitType == null || commitsByCommitType.isEmpty()) {
-            return null;
-        }
+        Objects.requireNonNull(commitsByCommitType, "commits by type can not be null");
 
         List<String> sections = new ArrayList<>();
 
         if (commitsByCommitType.get(ConventionalCommitType.BREAKING_CHANGE) != null) {
-            sections.add(getSection(BREAKING_HEADER, commitsByCommitType.get(ConventionalCommitType.BREAKING_CHANGE)));
+            getSection(BREAKING_HEADER, commitsByCommitType.get(ConventionalCommitType.BREAKING_CHANGE)).ifPresent(sections::add);
         }
 
         if (commitsByCommitType.get(ConventionalCommitType.FIX) != null) {
-            sections.add(getSection(BUG_FIXES_HEADER, commitsByCommitType.get(ConventionalCommitType.FIX)));
+            getSection(BUG_FIXES_HEADER, commitsByCommitType.get(ConventionalCommitType.FIX)).ifPresent(sections::add);
         }
 
         if (commitsByCommitType.get(ConventionalCommitType.FEAT) != null) {
-            sections.add(getSection(FEATURE_HEADER, commitsByCommitType.get(ConventionalCommitType.FEAT)));
+            getSection(FEATURE_HEADER, commitsByCommitType.get(ConventionalCommitType.FEAT)).ifPresent(sections::add);
         }
 
         if (commitsByCommitType.get(ConventionalCommitType.DOCS) != null) {
-            sections.add(getSection(DOCS_HEADER, commitsByCommitType.get(ConventionalCommitType.DOCS)));
+            getSection(DOCS_HEADER, commitsByCommitType.get(ConventionalCommitType.DOCS)).ifPresent(sections::add);
         }
 
         if (commitsByCommitType.get(ConventionalCommitType.CI) != null) {
-            sections.add(getSection(CI_HEADER, commitsByCommitType.get(ConventionalCommitType.CI)));
+            getSection(CI_HEADER, commitsByCommitType.get(ConventionalCommitType.CI)).ifPresent(sections::add);
         }
 
         if (commitsByCommitType.get(ConventionalCommitType.BUILD) != null) {
-            sections.add(getSection(BUILD_HEADER, commitsByCommitType.get(ConventionalCommitType.BUILD)));
+            getSection(BUILD_HEADER, commitsByCommitType.get(ConventionalCommitType.BUILD)).ifPresent(sections::add);
         }
 
         sections = sections.stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        if (sections.isEmpty()) {
-            return null;
-        }
-
         return String.format(CHANGELOG_FORMAT, nextVersion, LocalDate.now(), "\n" + String.join("\n", sections));
     }
 
-    private String getSection(String header, Set<Commit> commits) {
+    private Optional<String> getSection(String header, Set<Commit> commits) {
         String sectionEntries = getSectionEntries(commits);
         if (sectionEntries != null && !sectionEntries.trim().equals("")) {
-            return "###" + header + "\n" + sectionEntries;
+            return Optional.of("###" + header + "\n" + sectionEntries);
         }
 
-        return null;
+        return Optional.empty();
     }
 
     private String getSectionEntries(Set<Commit> commits) {

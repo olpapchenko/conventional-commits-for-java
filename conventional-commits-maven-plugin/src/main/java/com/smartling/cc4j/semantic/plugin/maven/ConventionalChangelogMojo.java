@@ -13,10 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Mojo(name = "changelog", aggregator = true, defaultPhase = LifecyclePhase.VALIDATE)
 public class ConventionalChangelogMojo extends AbstractVersioningMojo {
@@ -30,10 +27,10 @@ public class ConventionalChangelogMojo extends AbstractVersioningMojo {
                 .getChangelogExtractor()
                 .getGroupedCommitsByCommitTypes();
 
-            ChangelogGenerator changelogGenerator = new ChangelogGenerator();
+            ChangelogGenerator changelogGenerator = new ChangelogGenerator("", "");
             String changeLogs = changelogGenerator.generate(this.getNextVersion().toString(), commitsByCommitTypes);
-
             appendChangeLogs(changeLogs);
+
         } catch (IOException | ScmApiException e) {
             throw new MojoExecutionException("SCM error: " + e.getMessage(), e);
         }
