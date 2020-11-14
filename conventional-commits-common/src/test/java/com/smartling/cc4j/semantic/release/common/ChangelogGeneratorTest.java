@@ -4,10 +4,10 @@ import com.smartling.cc4j.semantic.release.common.changelog.ChangelogGenerator;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 public class ChangelogGeneratorTest {
     private static final String COMMIT_HASH = "2717635691";
@@ -16,7 +16,7 @@ public class ChangelogGeneratorTest {
 
     private ChangelogGenerator changelogGenerator;
 
-    private static final String EXPECTED_CHANGELOG = "## 0.2.7 (2020-10-18)\n" +
+    private static final String EXPECTED_CHANGELOG =
         "###Breaking changes\n" +
         "* breaking change test [(27176356)](http://repo.com?id=2717635691)\n" +
         "###Bug fixes\n" +
@@ -32,8 +32,7 @@ public class ChangelogGeneratorTest {
         "###Build\n" +
         "* build test [(27176356)](http://repo.com?id=2717635691)";
 
-    private static final String EXPECTED_CHANGELOG_NO_URLS = "## 0.2.7 (2020-10-18)\n" +
-        "###Breaking changes\n" +
+    private static final String EXPECTED_CHANGELOG_NO_URLS = "###Breaking changes\n" +
         "* breaking change test (2717635691)\n" +
         "###Bug fixes\n" +
         "* fix test (2717635691)\n" +
@@ -54,16 +53,14 @@ public class ChangelogGeneratorTest {
     }
 
     @Test
-    public void testNoChangelogGeneratedOnEmptyChanges() {
-        assertNull(changelogGenerator.generate("0.0.1", Collections.emptyMap()));
-
+    public void testOnlyHeaderGeneratedOnEmptyChanges() {
         Map<ConventionalCommitType, Set<Commit>> commits = new HashMap<>();
-        assertNull(changelogGenerator.generate("0.0.1", commits));
+        assertEquals(getExpectedChangelogHeader("0.0.1"), changelogGenerator.generate("0.0.1", commits));
 
         commits.put(ConventionalCommitType.FEAT, new HashSet<>(Collections.singletonList(
             new Commit(
-                new DummyCommitAdapter("ci this message will not me included to changelog as there is no colon", COMMIT_HASH)))));
-        assertNull(changelogGenerator.generate("0.0.1", commits));
+                new DummyCommitAdapter("ci this message will not be included to changelog as there is no colon", COMMIT_HASH)))));
+        assertEquals(getExpectedChangelogHeader("0.0.1"), changelogGenerator.generate("0.0.1", commits));
     }
 
     @Test(expected = NullPointerException.class)
@@ -75,14 +72,14 @@ public class ChangelogGeneratorTest {
     public void testChangelogGenerated() {
         Map<ConventionalCommitType, Set<Commit>> commitsByCommitType = getCommitsByCommitType();
         String changelog = changelogGenerator.generate("0.2.7", commitsByCommitType);
-        assertEquals(EXPECTED_CHANGELOG, changelog);
+        assertEquals(EXPECTED_CHANGELOG, changelog.substring(changelog.indexOf("\n") + 1));
     }
 
     @Test
     public void testChangelogGeneratedNoUrlFormatsProvided() {
         Map<ConventionalCommitType, Set<Commit>> commitsByCommitType = getCommitsByCommitType();
         String changelog = new ChangelogGenerator(null, null).generate("0.2.7", commitsByCommitType);
-        assertEquals(EXPECTED_CHANGELOG_NO_URLS, changelog);
+        assertEquals(EXPECTED_CHANGELOG_NO_URLS, changelog.substring(changelog.indexOf("\n") + 1));
     }
 
     private Map<ConventionalCommitType, Set<Commit>> getCommitsByCommitType() {
@@ -103,5 +100,9 @@ public class ChangelogGeneratorTest {
         res.put(ConventionalCommitType.DOCS,
             new HashSet<>(Collections.singletonList(new Commit(new DummyCommitAdapter("docs: docs test", COMMIT_HASH)))));
         return res;
+    }
+
+    private String getExpectedChangelogHeader(String version) {
+        return "## " + version + " (" + LocalDate.now() + ")\n";
     }
 }

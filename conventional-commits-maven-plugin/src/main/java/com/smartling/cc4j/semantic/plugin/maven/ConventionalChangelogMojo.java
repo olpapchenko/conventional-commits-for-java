@@ -28,7 +28,7 @@ public class ConventionalChangelogMojo extends AbstractVersioningMojo {
     private String trackingSystemUrlFormat;
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void execute() throws MojoExecutionException {
         try {
             Map<ConventionalCommitType, Set<Commit>> commitsByCommitTypes = this
                 .getChangelogExtractor()
@@ -37,7 +37,6 @@ public class ConventionalChangelogMojo extends AbstractVersioningMojo {
             ChangelogGenerator changelogGenerator = new ChangelogGenerator(repoUrlFormat, trackingSystemUrlFormat);
             String changeLogs = changelogGenerator.generate(this.getNextVersion().toString(), commitsByCommitTypes);
             appendChangeLogs(changeLogs);
-
         } catch (IOException | ScmApiException e) {
             throw new MojoExecutionException("SCM error: " + e.getMessage(), e);
         }

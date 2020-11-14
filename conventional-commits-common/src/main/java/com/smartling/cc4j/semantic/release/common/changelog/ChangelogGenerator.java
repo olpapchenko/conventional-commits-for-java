@@ -23,8 +23,9 @@ public class ChangelogGenerator {
     private static final String DOCS_HEADER = "Docs";
     private static final String CI_HEADER = "CI";
     private static final String BUILD_HEADER = "Build";
-    private String repoUrlFormat;
-    private String trackingSystemUrlFormat;
+
+    private final String repoUrlFormat;
+    private final String trackingSystemUrlFormat;
 
     public ChangelogGenerator(String repoUrlFormat, String trackingSystemUrlFormat) {
         this.repoUrlFormat = repoUrlFormat;
@@ -87,11 +88,11 @@ public class ChangelogGenerator {
     }
 
     private Optional<String> getChangeLogEntry(Commit commit) {
-        if(!commit.getCommitMessageDescription().isPresent()) {
+        if (!commit.getCommitMessageDescription().isPresent()) {
             logger.warn("Skipping message for commit: {}", commit.getCommitHash());
         }
         return commit.getCommitMessageDescription().map(message -> {
-            if(commit.getCommitMessageDescription().get().trim().equals("")) {
+            if (commit.getCommitMessageDescription().get().trim().equals("")) {
                 logger.warn("Skipping message for commit: {}", commit.getCommitHash());
                 return null;
             }
@@ -100,15 +101,15 @@ public class ChangelogGenerator {
     }
 
     private String getCommitHashLink(Commit commit) {
-        if(this.repoUrlFormat == null) {
+        if (this.repoUrlFormat == null) {
             return " (" + commit.getCommitHash() + ")";
         } else {
-            return " " + String.format(MD_LINK_FORMAT, "(" + commit.getCommitHash().substring(0, COMMIT_HASH_DISPLAYED_LENGTH) + ")", String.format(this.repoUrlFormat, commit.getCommitHash())) ;
+            return " " + String.format(MD_LINK_FORMAT, "(" + commit.getCommitHash().substring(0, COMMIT_HASH_DISPLAYED_LENGTH) + ")", String.format(this.repoUrlFormat, commit.getCommitHash()));
         }
     }
 
     private String getTrackingSystemLink(Commit commit) {
-        if(this.trackingSystemUrlFormat == null) {
+        if (this.trackingSystemUrlFormat == null || !commit.getTrackingSystemId().isPresent()) {
             return commit.getTrackingSystemId().map(s -> " (" + s + ")").orElse("");
         } else {
             return " " + String.format(MD_LINK_FORMAT, "(" + commit.getTrackingSystemId().get() + ")", String.format(this.trackingSystemUrlFormat, commit.getTrackingSystemId().get()));
