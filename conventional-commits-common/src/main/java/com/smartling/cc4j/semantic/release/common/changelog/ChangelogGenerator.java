@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ChangelogGenerator {
-    public static final int COMMIT_HASH_DISPLAYED_LENGTH = 8;
+    public static final int COMMIT_HASH_DISPLAYED_LENGTH = 10;
     private final Logger logger = LoggerFactory.getLogger(LogHandler.class);
 
     private static final String CHANGELOG_FORMAT = "## %s (%s)" +
@@ -102,7 +102,7 @@ public class ChangelogGenerator {
 
     private String getCommitHashLink(Commit commit) {
         if (this.repoUrlFormat == null) {
-            return " (" + commit.getCommitHash() + ")";
+            return " (" + commit.getCommitHash().substring(0, COMMIT_HASH_DISPLAYED_LENGTH) + ")";
         } else {
             return " " + String.format(MD_LINK_FORMAT, "(" + commit.getCommitHash().substring(0, COMMIT_HASH_DISPLAYED_LENGTH) + ")", String.format(this.repoUrlFormat, commit.getCommitHash()));
         }

@@ -6,6 +6,8 @@ import com.smartling.cc4j.semantic.release.common.SemanticVersion;
 import com.smartling.cc4j.semantic.release.common.SemanticVersionChange;
 import com.smartling.cc4j.semantic.release.common.changelog.ChangelogExtractor;
 import com.smartling.cc4j.semantic.release.common.changelog.GitChangelogExtractor;
+import com.smartling.cc4j.semantic.release.common.scm.GitRepositoryAdapter;
+import com.smartling.cc4j.semantic.release.common.scm.RepositoryAdapter;
 import com.smartling.cc4j.semantic.release.common.scm.ScmApiException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -39,6 +41,11 @@ abstract class AbstractVersioningMojo extends AbstractMojo {
         //Repository repository = new RepositoryBuilder().findGitDir().build();
         MavenConventionalVersioning mvnConventionalVersioning = new MavenConventionalVersioning(repository);
         return mvnConventionalVersioning.getConventionalVersioning();
+    }
+
+    RepositoryAdapter getRepositoryAdapter() throws IOException {
+        Repository repository = new RepositoryBuilder().setWorkTree(baseDir).build();
+        return new GitRepositoryAdapter(repository);
     }
 
     ChangelogExtractor getChangelogExtractor() throws IOException {

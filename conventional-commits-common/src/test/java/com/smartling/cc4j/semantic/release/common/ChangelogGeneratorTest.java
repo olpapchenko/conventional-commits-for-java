@@ -18,19 +18,19 @@ public class ChangelogGeneratorTest {
 
     private static final String EXPECTED_CHANGELOG =
         "###Breaking changes\n" +
-        "* breaking change test [(27176356)](http://repo.com?id=2717635691)\n" +
+        "* breaking change test [(2717635691)](http://repo.com?id=2717635691)\n" +
         "###Bug fixes\n" +
-        "* fix test 2 [(27176356)](http://repo.com?id=2717635691)\n" +
-        "* fix test [(27176356)](http://repo.com?id=2717635691)\n" +
-        "* fix ui test [(ticket-id)](http://test.com?id=ticket-id) [(27176356)](http://repo.com?id=2717635691)\n" +
+        "* fix test 2 [(2717635691)](http://repo.com?id=2717635691)\n" +
+        "* fix test [(2717635691)](http://repo.com?id=2717635691)\n" +
+        "* fix ui test [(ticket-id)](http://test.com?id=ticket-id) [(2717635691)](http://repo.com?id=2717635691)\n" +
         "###Feature\n" +
-        "* fix test [(27176356)](http://repo.com?id=2717635691)\n" +
+        "* fix test [(2717635691)](http://repo.com?id=2717635691)\n" +
         "###Docs\n" +
-        "* docs test [(27176356)](http://repo.com?id=2717635691)\n" +
+        "* docs test [(2717635691)](http://repo.com?id=2717635691)\n" +
         "###CI\n" +
-        "* ci test [(27176356)](http://repo.com?id=2717635691)\n" +
+        "* ci test [(2717635691)](http://repo.com?id=2717635691)\n" +
         "###Build\n" +
-        "* build test [(27176356)](http://repo.com?id=2717635691)";
+        "* build test [(2717635691)](http://repo.com?id=2717635691)";
 
     private static final String EXPECTED_CHANGELOG_NO_URLS = "###Breaking changes\n" +
         "* breaking change test (2717635691)\n" +

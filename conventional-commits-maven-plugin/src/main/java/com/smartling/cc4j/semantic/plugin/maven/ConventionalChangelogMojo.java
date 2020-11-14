@@ -3,6 +3,7 @@ package com.smartling.cc4j.semantic.plugin.maven;
 import com.smartling.cc4j.semantic.release.common.Commit;
 import com.smartling.cc4j.semantic.release.common.ConventionalCommitType;
 import com.smartling.cc4j.semantic.release.common.changelog.ChangelogGenerator;
+import com.smartling.cc4j.semantic.release.common.scm.RepositoryAdapter;
 import com.smartling.cc4j.semantic.release.common.scm.ScmApiException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -37,6 +38,7 @@ public class ConventionalChangelogMojo extends AbstractVersioningMojo {
             ChangelogGenerator changelogGenerator = new ChangelogGenerator(repoUrlFormat, trackingSystemUrlFormat);
             String changeLogs = changelogGenerator.generate(this.getNextVersion().toString(), commitsByCommitTypes);
             appendChangeLogs(changeLogs);
+            commitChanges();
         } catch (IOException | ScmApiException e) {
             throw new MojoExecutionException("SCM error: " + e.getMessage(), e);
         }
@@ -53,5 +55,11 @@ public class ConventionalChangelogMojo extends AbstractVersioningMojo {
         List<String> prevChangeLogs = Files.readAllLines(changelogPath);
         resultChangeLogs.addAll(prevChangeLogs);
         Files.write(changelogPath, resultChangeLogs);
+    }
+
+    private void commitChanges() throws IOException, ScmApiException {
+        RepositoryAdapter repositoryAdapter = getRepositoryAdapter();
+        repositoryAdapter.addFile(CHANGELOG_FILE_NAME);
+        repositoryAdapter.commit("ci: update changelog");
     }
 }
