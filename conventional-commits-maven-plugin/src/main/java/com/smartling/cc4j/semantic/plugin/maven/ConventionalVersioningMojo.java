@@ -17,6 +17,8 @@ import java.util.Properties;
 @Mojo(name = "version", aggregator = true, defaultPhase = LifecyclePhase.VALIDATE)
 public class ConventionalVersioningMojo extends AbstractVersioningMojo
 {
+    private static final String VERSION_FILE_NAME = "version.props";
+
     @Parameter(defaultValue = "${session}", readonly = true, required = true)
     private MavenSession session;
 
@@ -42,10 +44,15 @@ public class ConventionalVersioningMojo extends AbstractVersioningMojo
 
         if (!f.exists())
         {
-            f.mkdirs();
+            boolean mkDirSuccess = f.mkdirs();
+            if (!mkDirSuccess)
+            {
+                throw new IllegalStateException("Can not create output dir to write " + VERSION_FILE_NAME + " file, path:"
+                    + outputDirectory.getAbsolutePath());
+            }
         }
 
-        File touch = new File(f, "version.props");
+        File touch = new File(f, VERSION_FILE_NAME);
 
         try (OutputStream out = new FileOutputStream(touch))
         {
