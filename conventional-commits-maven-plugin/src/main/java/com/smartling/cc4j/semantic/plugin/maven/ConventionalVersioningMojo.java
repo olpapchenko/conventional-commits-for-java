@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -42,14 +43,12 @@ public class ConventionalVersioningMojo extends AbstractVersioningMojo
     {
         File f = outputDirectory;
 
-        if (!f.exists())
+        try
         {
-            boolean mkDirSuccess = f.mkdirs();
-            if (!mkDirSuccess)
-            {
-                throw new IllegalStateException("Can not create output dir to write " + VERSION_FILE_NAME + " file, path:"
-                    + outputDirectory.getAbsolutePath());
-            }
+            Files.createDirectories(f.toPath());
+        } catch (IOException e)
+        {
+            throw new MojoExecutionException("Failed to create output dir: " + f.getAbsolutePath(), e);
         }
 
         File touch = new File(f, VERSION_FILE_NAME);
